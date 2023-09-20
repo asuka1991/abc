@@ -3,8 +3,8 @@ import ChatModel from "../src/models/chat.js";
 const router = express.Router();
  
 router.post("/chats", async (request, response) => {
-  console.log(123)
-  const chat = new ChatModel(request.body);
+  const { content, userId } = request.body;
+  const chat = new ChatModel({content, userId});
 
   try {
     await chat.save();

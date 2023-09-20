@@ -1,31 +1,39 @@
 import express from "express";
 import connectDB from "./configs/db.js";
-import { createServer } from "http";
+import http from "http";
 import { Server } from "socket.io";
+import cors from "cors";
+import 'dotenv/config';
 import ChatRouter from "./routers/ChatRouter.js";
 
 const app = express();
-const httpServer = createServer();
-const io = new Server(httpServer, {
-	cors: {
-		origin: "*",
-	}
-});
-const PORT = process.env.PORT || 8080;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+      origin: "*",
+  }
+}); 
+const PORT = 5000;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use("/api", ChatRouter);
+app.use(express.static("public"));
+app.use(express.json({ extended: false }));
+app.use(cors({ origin: true, credentials: true }));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "DELETE, PUT, GET, POST");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 
 connectDB();
 
-app.get("/", (request, response) => {
-  response.send({ message: "Hello from an Express API!" });
-});
+app.use("/api", ChatRouter);
 
-app.post("/post", (req, res) => {
-  console.log("Connected to React");
-  res.redirect("/");
+app.get("/", (req, res) => {
+  res.json({ message: "Test" });
 });
 
 io.on('connection', (socket) => {
@@ -33,6 +41,6 @@ io.on('connection', (socket) => {
   socket.on("disconnect", () => console.log("Client disconnected"));
 });
 
-httpServer.listen(PORT, () => {
-  console.log(process.env.PORT)
+server.listen(PORT, () => {
+  console.log(`App is running on http://localhost:${PORT}`);
 });

@@ -4,6 +4,7 @@ const ChatSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
+    index: true,
   },
   userId: {
     type: String,
